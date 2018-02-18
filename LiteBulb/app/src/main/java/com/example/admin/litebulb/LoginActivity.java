@@ -25,10 +25,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import SQL.AppConfig;
-import SQL.AppController;
-import SQL.SQLiteHandler;
-
 //import com.example.admin.litebulb.SystemBarTintManager;
 
 public class LoginActivity extends Activity {

@@ -23,10 +23,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import SQL.AppConfig;
-import SQL.AppController;
-import SQL.SQLiteHandler;
-
 public class SignUpActivity extends Activity {
     private static final String TAG = SignUpActivity.class.getSimpleName();
     private Button btnRegister;
