@@ -56,6 +56,7 @@ public class MoreCategoryItems extends AppCompatActivity {
         mCategoriesRef = FirebaseDatabase.getInstance().getReference().child("categories");
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
+/*
         final ArrayList<String> subCategoriesSpinner = new ArrayList<>();
         final ArrayList<String> subCategoriesIds = new ArrayList<>();
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, R.layout.sub_categories_spinner_item, subCategoriesSpinner);
@@ -84,6 +85,7 @@ public class MoreCategoryItems extends AppCompatActivity {
 
             }
         });
+*/
 
         databaseReference.child("items_to_category").addValueEventListener(new ValueEventListener() {
             @Override
