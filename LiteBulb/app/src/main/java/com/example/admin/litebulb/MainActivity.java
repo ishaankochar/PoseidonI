@@ -1,6 +1,7 @@
 package com.example.admin.litebulb;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -43,6 +45,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 
@@ -59,16 +62,11 @@ public class MainActivity extends AppCompatActivity {
     ArrayAdapter<String> list_adapter;
     //HashMap<ExpandedMenuModel, List<String>> listDataChild;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    private SharedPreferences preferences;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try{
-            setContentView(R.layout.activity_main);
-        }catch(Exception e)
-        {
-            Log.e("MAINACTIVITY","The error is "+e);
-            throw e;
-        }
+        setContentView(R.layout.activity_main);
 
         drawerLayout=(DrawerLayout)findViewById(R.id.d1);
         actionBarDrawerToggle= new ActionBarDrawerToggle(this,drawerLayout, R.string.Open, R.string.Close);
@@ -76,12 +74,25 @@ public class MainActivity extends AppCompatActivity {
         //expandableList= (ExpandableListView) findViewById(R.id.navigationmenu);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
-        BlankFragment3 fragment3=new BlankFragment3();
+
+        preferences = getApplicationContext().getSharedPreferences("preferences", MODE_PRIVATE);
 
         FragmentTransaction transaction2 = getSupportFragmentManager().beginTransaction();
-        transaction2.replace(R.id.contentContainer, fragment3);
-        transaction2.addToBackStack(null);
-        transaction2.commit();
+        String itemId = preferences.getString("itemId","");
+        if(itemId!=null || !itemId.equalsIgnoreCase("")){
+            ItemClickFragment itemClickFragment = new ItemClickFragment();
+            Bundle args = new Bundle();
+            args.putString("id", itemId);
+            itemClickFragment.setArguments(args);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            transaction2.replace(R.id.contentContainer, itemClickFragment);
+            transaction2.commit();
+        }else{
+            BlankFragment3 fragment3=new BlankFragment3();
+            transaction2.replace(R.id.contentContainer, fragment3);
+            transaction2.addToBackStack(null);
+            transaction2.commit();
+        }
         actionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
        //final NavigationView nav_view=(NavigationView)findViewById(R.id.nav_view);
@@ -120,14 +131,58 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 String title=item.getTitle().toString();
-                Log.e("MAINACTIVITY", title+" This is it");
+                Log.e("MAINACTIVITY", title+" This is it" + item.getItemId());
+//                mMenu.removeItem(item.getItemId());
+                if (parentChildren.containsKey(item.getItemId())) {
+                    int i=0;
+                    try {
+                        while(true) {
+                            MenuItem mi = mMenu.getItem(i);
+                            if (parentChildren.get(item.getItemId()).contains(mi.getItemId())) {
+                                mi.setVisible(true);
+                            } else if (children.contains(mi.getItemId())) {
+                                mi.setVisible(false);
+                            }
+                                i++;
 
-                Intent intent= new Intent(MainActivity.this, CategoriesTabs.class);
+                        }
+                    } catch (IndexOutOfBoundsException e) {}
+                }else{
+                    int parentId = -1;
+                    for (HashMap.Entry<Integer, ArrayList<Integer> > e:
+  parentChildren.entrySet()                       ) {
+                        if (e.getValue().contains(item.getItemId())) {
+                            parentId = e.getKey();
+                            break;
+                        }
+                    }
+
+                    int i =0;
+                    try {
+                        int j=0;
+                        while (true) {
+                            MenuItem mi = mMenu.getItem(i++);
+                                if (mi.getItemId() == parentId) {
+                                    String parentName = mi.getTitle().toString();
+                                    Log.e("MainActivity","Category Name : "+parentName+"Sub Title"+title);
+                                    SharedPreferences.Editor editor = preferences.edit();
+                                    editor.putString("category", parentName);
+                                    editor.putString("subCategory", title);
+                                    editor.apply();
+                                }
+                        }
+                    } catch (IndexOutOfBoundsException e) {};
+                    Intent intent = new Intent(MainActivity.this, CategoriesTabs.class);
+                    startActivity(intent);
+                }
+//                navigationView.invalidate();
+
+                /*Intent intent= new Intent(MainActivity.this, CategoriesTabs.class);
                 intent.putExtra("title", title);
                 startActivity(intent);
                 drawerLayout.closeDrawer(GravityCompat.END);
                 drawerLayout.closeDrawer(GravityCompat.END);
-                return true;
+                */return true;
             }
         });
         rightNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -177,12 +232,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if(tabId==R.id.tab_popular)
                 {
-
                     switchToFragment4();
                 }
                 else if(tabId==R.id.tab_collections)
                 {
-
                     switchToFragment5();
                 }
 
@@ -204,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if(tabId==R.id.tab_popular)
                 {
-
                     switchToFragment4();
                 }
                 else if(tabId==R.id.tab_collections)
@@ -234,6 +286,10 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
+    private Menu mMenu;
+    private int id = 1;
+    private HashMap<Integer, ArrayList<Integer> > parentChildren = new HashMap<>();
+    private ArrayList<Integer> children = new ArrayList<>();
     private void makeJsonArrayRequest() {
 
         JsonArrayRequest req = new JsonArrayRequest(AppConfig.URL_CATEGORIES,
@@ -247,18 +303,53 @@ public class MainActivity extends AppCompatActivity {
 
                                 String meta_title = person.getString("meta_title");
                                 int sub_of = person.getInt("sub_of");
+                                int idJSON = person.getInt("id");
 
                                 if (sub_of == 0) {
                                     Menu menu = navigationView.getMenu();
-                                    //Menu submenu = menu.addSubMenu("New Super SubMenu");
+                                    mMenu = menu;
+                                    menu.add(Menu.NONE, id, id, meta_title);
+                                    int gid = id;
+                                    id++;
+                                    parentChildren.put(gid, new ArrayList<Integer>());
+                                    for(int j=0; j < response.length(); j++){
+                                        JSONObject child = (JSONObject) response.get(j);
+                                        int sub_of_child = child.getInt("sub_of");
 
-                                    menu.add(meta_title);
+                                        if(sub_of_child==idJSON){
+                                            String meta_title_child = child.getString("meta_title");
+                                            menu.add(Menu.NONE, id, id, "\t\t\t"+meta_title_child);
+                                            parentChildren.get(gid).add(id);
+//                                    menu.getItem(id).setVisible(false);
+                                            children.add(id);
+                                            id++;
+                                        }
+                                    }
 
+/*
+                                    id++;
+                                    menu.add(Menu.NONE, id, id, "\t\tchild:" + gid+"-"+id);
+                                    parentChildren.get(gid).add(id);
+//                                    menu.getItem(id).setVisible(false);
+                                    children.add(id);
+
+                                    id++;
+                                    menu.add(Menu.NONE, id, id, "\t\tchild:"+gid+"-"+id);
+                                    parentChildren.get(gid).add(id);
+//                                    menu.getItem(id).setVisible(false);
+                                    children.add(id);*/
+                                    id++;
+
+//                                    menu.setGroupVisible(gid, false);
+                    /*                mMenu.add(Menu.NONE, id++, Menu.NONE, "test-submenu-child" + id);
+                                    mMenu.add(Menu.NONE, id++, Menu.NONE, "test-submenu-child" + id);
+*/
                                     navigationView.invalidate();
                                     mLocation.add(meta_title);
-                                    // list_adapter.notifyDataSetChanged();
                                 }
                             }
+
+
                             /*txtResponse.setText(jsonResponse);*/
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -315,5 +406,4 @@ public class MainActivity extends AppCompatActivity {
                 super.onOptionsItemSelected(item);
 
     }
-
 }

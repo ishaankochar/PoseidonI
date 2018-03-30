@@ -1,5 +1,6 @@
 package com.example.admin.litebulb;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ public class MoreCategoryItems extends AppCompatActivity {
     private ArrayList<CategoryItem> categoryItems = new ArrayList<>();
     private CategoryItemAdapter categoryItemAdapter;
     private MoreCategoryItemAdapter moreCategoryItemAdapter;
+    private ProgressDialog progressDialog;
     private ArrayList<MoreMainCategory> moreMainCategories = new ArrayList<>();
 
     @Override
@@ -55,9 +57,11 @@ public class MoreCategoryItems extends AppCompatActivity {
         Log.e("MoreCategoriesItems","The Category Id is : "+moreMainCategoryId);
         mCategoriesRef = FirebaseDatabase.getInstance().getReference().child("categories");
         databaseReference = FirebaseDatabase.getInstance().getReference();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Loading...");
+        progressDialog.show();
 
-/*
-        final ArrayList<String> subCategoriesSpinner = new ArrayList<>();
+     /*   final ArrayList<String> subCategoriesSpinner = new ArrayList<>();
         final ArrayList<String> subCategoriesIds = new ArrayList<>();
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, R.layout.sub_categories_spinner_item, subCategoriesSpinner);
         spinnerArrayAdapter.setDropDownViewResource(R.layout.sub_categories_spinner_item);
@@ -80,8 +84,8 @@ public class MoreCategoryItems extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
-        });
-*/
+        });*/
+
 
         databaseReference.child("items_to_category").addValueEventListener(new ValueEventListener() {
             @Override
@@ -108,6 +112,28 @@ public class MoreCategoryItems extends AppCompatActivity {
                                         ci.setName(items.child("name").getValue(String.class));
                                         ci.setPrice(items.child("price").getValue(String.class));
                                         ci.setCategory(categoryIdsPartOf);
+                                        ci.setCategory("");
+
+                                        databaseReference.child("categories").addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                int counterName=0;
+                                                for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
+                                                    if(categoryIdsPartOf.contains(childSnapshot.child("id").getValue(String.class))){
+                                                        if(counterName==0){
+                                                            ci.setCategory(ci.getCategory()+childSnapshot.child("meta_title").getValue(String.class));
+                                                        }else
+                                                            ci.setCategory(ci.getCategory()+", "+childSnapshot.child("meta_title").getValue(String.class));
+                                                        counterName++;
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
                                         categoryItems.add(ci);
                                         noItemText.setVisibility(View.GONE);
                                     }
@@ -123,6 +149,7 @@ public class MoreCategoryItems extends AppCompatActivity {
                     }
                 }
                 categoryItemAdapter.notifyDataSetChanged();
+                progressDialog.dismiss();
             }
 
             @Override

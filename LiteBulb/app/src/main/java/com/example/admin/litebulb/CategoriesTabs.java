@@ -1,6 +1,7 @@
 package com.example.admin.litebulb;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -58,6 +59,7 @@ public class CategoriesTabs extends AppCompatActivity {
     int id_of_item_table, id_of_categories_table, price;
     String name, thumbnail, meta_title, sub_of, categories;
     private ArrayList<TabsModel> categoriesTabs = new ArrayList<>();
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +121,14 @@ public class CategoriesTabs extends AppCompatActivity {
         }
         mViewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(mViewPager);
+        preferences = getSharedPreferences("preferences", MODE_PRIVATE);
+        int position=0;
+        for(int i=0; i<categoriesTabs.size(); i++){
+            if(categoriesTabs.get(i).getMetaTitle().equals(preferences.getString("category","")))
+                position = i;
+        }
+        Toast.makeText(this, "Position : "+position, Toast.LENGTH_SHORT).show();
+        mViewPager.setCurrentItem(position);
     }
 
 
@@ -297,6 +307,12 @@ public class CategoriesTabs extends AppCompatActivity {
         {
             Log.e("BlankFragment3", e+ " This is the error");
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mProgress.dismiss();
     }
 }
 

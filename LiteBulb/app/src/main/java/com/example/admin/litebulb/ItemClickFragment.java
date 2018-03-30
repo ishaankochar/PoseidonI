@@ -35,7 +35,8 @@ public class ItemClickFragment extends Fragment {
     int itemId;
     ImageView top_image;
     TextView name_of_item, description, item_price;
-
+    public static final int CONNECTION_TIMEOUT = 10000;
+    public static final int READ_TIMEOUT = 15000;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

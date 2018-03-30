@@ -30,7 +30,11 @@
     <string name="action_play_next">Play Next</string>
     <string name="backdrop_title">LOVE MUSIC</string>
     <string name="backdrop_subtitle">This season top 20 albums</string>
-    <string name="hello_blank_fragment"></string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="view"><u>View All</u></string>
     <string name="prepaid_benefit">With our deposit system, not only will purchasing be much faster, but we\'ll also take off the price!</string>
+
+    <string name="facebook_app_id">867287170109084</string>
+    <string name="fb_login_protocol_scheme">fb867287170109084</string>
+
 </resources>
