@@ -26,6 +26,7 @@ dependencies {
     implementation 'com.android.support:support-v4:25.4.0'
     implementation 'com.facebook.fresco:fresco:1.8.1'
     implementation 'com.facebook.android:facebook-login:[4,5)'
+    implementation 'com.paypal.sdk:paypal-android-sdk:2.15.3'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
 

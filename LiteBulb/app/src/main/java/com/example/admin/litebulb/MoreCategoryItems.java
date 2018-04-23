@@ -50,7 +50,7 @@ public class MoreCategoryItems extends AppCompatActivity {
         subCategories = (Spinner) findViewById(R.id.sub_categories_dropdown);
         subCategories.setVisibility(View.GONE);
         itemrv.setLayoutManager(new LinearLayoutManager(this));
-        categoryItemAdapter = new CategoryItemAdapter(categoryItems);
+        categoryItemAdapter = new CategoryItemAdapter(categoryItems, getApplicationContext());
         itemrv.setAdapter(categoryItemAdapter);
         Intent intent = getIntent();
         final String moreMainCategoryId = intent.getExtras().getString("moreMainCategoryId");
@@ -127,6 +127,7 @@ public class MoreCategoryItems extends AppCompatActivity {
                                                         counterName++;
                                                     }
                                                 }
+                                                progressDialog.dismiss();
                                             }
 
                                             @Override
@@ -149,7 +150,7 @@ public class MoreCategoryItems extends AppCompatActivity {
                     }
                 }
                 categoryItemAdapter.notifyDataSetChanged();
-                progressDialog.dismiss();
+
             }
 
             @Override

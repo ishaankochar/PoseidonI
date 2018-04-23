@@ -206,8 +206,6 @@ public class LoginActivity extends Activity {
     public void doSomethingElse() {
         inputName.setText(username+"");
         inputPassword.setText(password+"");
-        /*startActivity(new Intent(LoginActivity.this, MainActivity.class));
-        LoginActivity.this.finish();*/
     }
 
 
@@ -464,7 +462,6 @@ public class LoginActivity extends Activity {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                         doSomethingElse();
-
                     }
 
 

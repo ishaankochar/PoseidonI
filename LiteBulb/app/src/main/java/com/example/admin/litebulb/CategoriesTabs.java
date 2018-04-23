@@ -3,6 +3,7 @@ package com.example.admin.litebulb;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -60,6 +61,7 @@ public class CategoriesTabs extends AppCompatActivity {
     String name, thumbnail, meta_title, sub_of, categories;
     private ArrayList<TabsModel> categoriesTabs = new ArrayList<>();
     private SharedPreferences preferences;
+    private FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +74,7 @@ public class CategoriesTabs extends AppCompatActivity {
         setSupportActionBar(toolbar);
         mProgress.show();
         mCategoriesRef = FirebaseDatabase.getInstance().getReference().child("categories");
+
 
         mCategoriesRef.addValueEventListener(new ValueEventListener() {
             @Override

@@ -45,6 +45,7 @@ public class ItemClickFragment extends Fragment {
         referenceActivity = getActivity();
         itemId = getArguments().getInt("id");
         try{
+            Log.e("ItemClickFragment","Layout inflated");
             parentHolder = inflater.inflate(R.layout.fragment_item_click, container,
                     false);
         }catch (Exception e) {

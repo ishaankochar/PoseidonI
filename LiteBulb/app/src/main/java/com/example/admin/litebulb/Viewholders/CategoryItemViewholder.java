@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.admin.litebulb.Adapters.CategoryItemAdapter;
@@ -18,7 +19,7 @@ import com.example.admin.litebulb.R;
  * Created on 13/2/18.
  */
 
-public class CategoryItemViewholder extends RecyclerView.ViewHolder {
+public class CategoryItemViewholder extends RecyclerView.ViewHolder  {
 
     private TextView nametv;
     private TextView pricetv;
@@ -53,11 +54,23 @@ public class CategoryItemViewholder extends RecyclerView.ViewHolder {
                     .into(thumbnail);
         }
     }
-    public void onClick()
-    {
+    public void onClick() {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(context, "Item Clicked!", Toast.LENGTH_SHORT).show();
+                SharedPreferences.Editor editor = context.getSharedPreferences("preferences", Context.MODE_PRIVATE).edit();
+                editor.putString("itemId",categoryItem.getItemId());
+                editor.commit();
+                Intent intent = new Intent(context, MainActivity.class);
+                context.startActivity(intent);
+            }
+        });
+
+        thumbnail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "Item Clicked!", Toast.LENGTH_SHORT).show();
                 SharedPreferences.Editor editor = context.getSharedPreferences("preferences", Context.MODE_PRIVATE).edit();
                 editor.putString("itemId",categoryItem.getItemId());
                 editor.commit();

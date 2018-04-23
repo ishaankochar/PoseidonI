@@ -77,20 +77,80 @@ public class MainActivity extends AppCompatActivity {
 
         preferences = getApplicationContext().getSharedPreferences("preferences", MODE_PRIVATE);
 
+        bottomBar= (BottomBar) findViewById(R.id.bottomBar);
+        bottomBar.setDefaultTabPosition(2);
+        bottomBar.setOnTabReselectListener(new OnTabReselectListener() {
+            @Override
+            public void onTabReSelected(int tabId) {
+                if (tabId == R.id.tab_featured) {
+                    switchToFragment1();
+                }
+                else if(tabId==R.id.tab_authors)
+                {
+                    switchToFragment2();
+                }
+                else if(tabId==R.id.tab_center)
+                {
+                    switchToFragment3();
+                }
+                else if(tabId==R.id.tab_popular)
+                {
+                    switchToFragment4();
+                }
+                else if(tabId==R.id.tab_collections)
+                {
+                    switchToFragment5();
+                }
+
+            }
+        });
+        bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
+            @Override
+            public void onTabSelected(@IdRes int tabId) {
+                if (tabId == R.id.tab_featured) {
+                    switchToFragment1();
+                }
+                else if(tabId==R.id.tab_authors)
+                {
+                    switchToFragment2();
+                }
+                else if(tabId==R.id.tab_center)
+                {
+                    switchToFragment3();
+                }
+                else if(tabId==R.id.tab_popular)
+                {
+                    switchToFragment4();
+                }
+                else if(tabId==R.id.tab_collections)
+                {
+
+                    switchToFragment5();
+                }
+            }
+        });
+
         FragmentTransaction transaction2 = getSupportFragmentManager().beginTransaction();
-        String itemId = preferences.getString("itemId","");
-        if(itemId!=null || !itemId.equalsIgnoreCase("")){
+        final String itemId = preferences.getString("itemId","");
+        Log.e("MainActivity","Item ID : "+itemId+"a");
+        if(itemId==null || itemId.equalsIgnoreCase("") || itemId.isEmpty()){
+            Log.e("MainActivity","In else of shared preference");
+            BlankFragment3 fragment3=new BlankFragment3();
+            transaction2.replace(R.id.contentContainer, fragment3);
+            transaction2.addToBackStack(null);
+            transaction2.commit();
+        }else{
+            Log.e("MainActivity","Item details got");
             ItemClickFragment itemClickFragment = new ItemClickFragment();
             Bundle args = new Bundle();
             args.putString("id", itemId);
             itemClickFragment.setArguments(args);
-            FragmentManager fragmentManager = getSupportFragmentManager();
             transaction2.replace(R.id.contentContainer, itemClickFragment);
-            transaction2.commit();
-        }else{
-            BlankFragment3 fragment3=new BlankFragment3();
-            transaction2.replace(R.id.contentContainer, fragment3);
             transaction2.addToBackStack(null);
+            SharedPreferences.Editor editor = getSharedPreferences("preferences", MODE_PRIVATE).edit();
+            editor.remove("itemId");
+            editor.apply();
+            Log.e("MainActivity","After deletion of shared pref -- ItemId : "+preferences.getString("itemId",""));
             transaction2.commit();
         }
         actionBarDrawerToggle.syncState();
@@ -150,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     int parentId = -1;
                     for (HashMap.Entry<Integer, ArrayList<Integer> > e:
-  parentChildren.entrySet()                       ) {
+                            parentChildren.entrySet()) {
                         if (e.getValue().contains(item.getItemId())) {
                             parentId = e.getKey();
                             break;
@@ -214,58 +274,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });*/
-        bottomBar= (BottomBar) findViewById(R.id.bottomBar);
-        bottomBar.setDefaultTabPosition(2);
-        bottomBar.setOnTabReselectListener(new OnTabReselectListener() {
-            @Override
-            public void onTabReSelected(int tabId) {
-                if (tabId == R.id.tab_featured) {
-                    switchToFragment1();
-                }
-                else if(tabId==R.id.tab_authors)
-                {
-                    switchToFragment2();
-                }
-                else if(tabId==R.id.tab_center)
-                {
-                    switchToFragment3();
-                }
-                else if(tabId==R.id.tab_popular)
-                {
-                    switchToFragment4();
-                }
-                else if(tabId==R.id.tab_collections)
-                {
-                    switchToFragment5();
-                }
 
-            }
-        });
-        bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
-            @Override
-            public void onTabSelected(@IdRes int tabId) {
-                if (tabId == R.id.tab_featured) {
-                    switchToFragment1();
-                }
-                else if(tabId==R.id.tab_authors)
-                {
-                    switchToFragment2();
-                }
-                else if(tabId==R.id.tab_center)
-                {
-                    switchToFragment3();
-                }
-                else if(tabId==R.id.tab_popular)
-                {
-                    switchToFragment4();
-                }
-                else if(tabId==R.id.tab_collections)
-                {
-
-                    switchToFragment5();
-                }
-            }
-        });
     }
     @Override
     public void onBackPressed() {
@@ -290,6 +299,7 @@ public class MainActivity extends AppCompatActivity {
     private int id = 1;
     private HashMap<Integer, ArrayList<Integer> > parentChildren = new HashMap<>();
     private ArrayList<Integer> children = new ArrayList<>();
+
     private void makeJsonArrayRequest() {
 
         JsonArrayRequest req = new JsonArrayRequest(AppConfig.URL_CATEGORIES,
@@ -325,7 +335,6 @@ public class MainActivity extends AppCompatActivity {
                                             id++;
                                         }
                                     }
-
 /*
                                     id++;
                                     menu.add(Menu.NONE, id, id, "\t\tchild:" + gid+"-"+id);
@@ -348,10 +357,21 @@ public class MainActivity extends AppCompatActivity {
                                     mLocation.add(meta_title);
                                 }
                             }
+                            int i=0;
+                            try {
+                                while(true) {
+                                    MenuItem mi = mMenu.getItem(i);
+                                    if (children.contains(mi.getItemId())) {
+                                        mi.setVisible(false);
+                                    }
+                                    i++;
 
+                                }
+                            } catch (IndexOutOfBoundsException e) {}
+                        }
 
                             /*txtResponse.setText(jsonResponse);*/
-                        } catch (JSONException e) {
+                            catch (JSONException e) {
                             e.printStackTrace();
                             Toast.makeText(MainActivity.this,
                                     "Error: " + e.getMessage(),
@@ -373,6 +393,7 @@ public class MainActivity extends AppCompatActivity {
         {
             Log.e("MainActivity", e+ " This is the error");
         }
+
     }
     public void switchToFragment1() {
         FragmentManager manager = getSupportFragmentManager();
